@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>RED AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #0e0e0e;
+      color: white;
+    }
+    header {
+      background-color: #ff1f1f;
+      padding: 20px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    #chat-box {
+      height: 80vh;
+      overflow-y: scroll;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .message {
+      max-width: 70%;
+      padding: 10px 15px;
+      border-radius: 15px;
+    }
+    .user {
+      background-color: #333;
+      align-self: flex-end;
+    }
+    .bot {
+      background-color: #ff1f1f;
+      align-self: flex-start;
+    }
+    form {
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+      background-color: #1a1a1a;
+    }
+    input[type="text"] {
+      width: 70%;
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #ff1f1f;
+      border: none;
+      color: white;
+      font-size: 16px;
+      margin-left: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <header>RED AI</header>
+
+  <div id="chat-box"></div>
+
+  <form id="chat-form">
+    <input type="text" id="user-input" placeholder="اكتب رسالتك هنا..." required />
+    <button type="submit">إرسال</button>
+  </form>
+
+  <script>
+    const chatBox = document.getElementById('chat-box');
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('user-input');
+
+    const OPENAI_API_KEY = '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'; // استبدل هذا بمفتاحك الحقيقي
+
+    async function getBotResponse(message) {
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${OPENAI_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [{ role: "user", content: message }]
+        })
+      });
+
+      const data = await response.json();
+      return data.choices[0].message.content;
+    }
+
+    function appendMessage(text, className) {
+      const messageDiv = document.createElement("div");
+      messageDiv.classList.add("message", className);
+      messageDiv.textContent = text;
+      chatBox.appendChild(messageDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const userMessage = input.value.trim();
+      if (!userMessage) return;
+
+      appendMessage(userMessage, "user");
+      input.value = "";
+      appendMessage("...", "bot");
+
+      const botResponse = await getBotResponse(userMessage);
+      document.querySelector(".bot:last-child").textContent = botResponse;
+    });
+  </script>
+
+</body>
+</html>
